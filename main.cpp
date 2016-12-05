@@ -26,8 +26,8 @@
 #include "rtos.h"
 
 #if MBED_CONF_APP_NETWORK_INTERFACE == WIFI
-#include "ESP8266Interface.h"
-ESP8266Interface esp(MBED_CONF_APP_WIFI_TX, MBED_CONF_APP_WIFI_RX);
+#include "SpwfInterface.h"
+SpwfSAInterface spwf(MBED_CONF_APP_WIFI_TX, MBED_CONF_APP_WIFI_RX, false);
 #elif MBED_CONF_APP_NETWORK_INTERFACE == ETHERNET
 #include "EthernetInterface.h"
 EthernetInterface eth;
@@ -347,6 +347,9 @@ void trace_printer(const char* str) {
 // Entry point to the program
 int main() {
 
+	  char * ssid = "STM";
+    char * seckey = "STMdemoPWD";
+
     unsigned int seed;
     size_t len;
 
@@ -387,8 +390,8 @@ Add MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES and MBEDTLS_TEST_NULL_ENTROPY in mbed_app
 #if MBED_CONF_APP_NETWORK_INTERFACE == WIFI
     output.printf("\n\rUsing WiFi \r\n");
     output.printf("\n\rConnecting to WiFi..\r\n");
-    connect_success = esp.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD);
-    network_interface = &esp;
+    connect_success = spwf.connect(ssid, seckey, NSAPI_SECURITY_WPA2);
+    network_interface = &spwf;
 #elif MBED_CONF_APP_NETWORK_INTERFACE == ETHERNET
     output.printf("Using Ethernet\r\n");
     connect_success = eth.connect();
@@ -401,7 +404,7 @@ Add MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES and MBEDTLS_TEST_NULL_ENTROPY in mbed_app
     connect_success = mesh.connect();
     network_interface = &mesh;
 #endif
-    if(connect_success == 0) {
+    if(connect_success) {
     output.printf("\n\rConnected to Network successfully\r\n");
     } else {
         output.printf("\n\rConnection to Network Failed %d! Exiting application....\r\n", connect_success);
